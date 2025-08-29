@@ -1,4 +1,4 @@
-name: Deploy Next.js to Azure
+name: Azure Web App Deploy
 
 on:
   push:
@@ -10,37 +10,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repo
-      - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # 2. Setup Node.js
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
 
-      # 3. Install dependencies
-      - name: Install dependencies
-        run: npm ci
+    - name: Install dependencies
+      run: npm ci
 
-      # 4. Build Next.js
-      - name: Build Next.js
-        run: npm run build
+    - name: Build Next.js app
+      run: npm run build
 
-      # 5. Prepare deployment folder
-      - name: Prepare deployment package
-        run: |
-          mkdir deploy
-          cp -r .next deploy/
-          cp package.json deploy/
-          cp package-lock.json deploy/
-          cp -r public deploy/
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: next-build
+        path: |
+          .next
+          package.json
+          package-lock.json
+          node_modules
 
-      # 6. Deploy to Azure
-      - name: Deploy to Azure
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: azure-demoo        # your Azure Web App name
-          slot-name: production
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: deploy
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: azure-demoo
+        slot-name: production
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: |
+          .next
+          package.json
+          package-lock.json
+          node_modules
