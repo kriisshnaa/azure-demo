@@ -10,43 +10,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
+      # 1. Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Node.js
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # Install dependencies
+      # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # Build Next.js app
+      # 4. Build Next.js app
       - name: Build
         run: npm run build
 
-      # Upload build artifacts
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: next-build
-          path: |
-            .next
-            package.json
-            package-lock.json
-            node_modules
-
-      # Deploy to Azure Web App
+      # 5. Deploy entire repository to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: azure-demoo
+          app-name: azure-demoo                # replace with your Azure Web App name
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: |
-            .next
-            package.json
-            package-lock.json
-            node_modules
+          package: .
